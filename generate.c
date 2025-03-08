@@ -1,57 +1,45 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#define MAX_LENGTH 1024
+int main() {
+    FILE *dataFile = fopen("data.txt", "r");
+    if (!dataFile) {
+        printf("Erreur d'ouverture du fichier data.txt\n");
+        return 1;
+    }
 
-void replace_placeholder(FILE *output_file, const char *placeholder, const char *value) {
-    char buffer[MAX_LENGTH];
+    char title[100], content[100];
+    fscanf(dataFile, "title=%99[^\n]\n", title);
+    fscanf(dataFile, "content=%99[^\n]\n", content);
+    fclose(dataFile);
 
-    // Lire le contenu du template ligne par ligne
-    while (fgets(buffer, MAX_LENGTH, output_file) != NULL) {
-        // Remplacer les placeholders
-        char *pos = strstr(buffer, placeholder);
-        if (pos != NULL) {
-            // Copier la partie avant le placeholder
-            *pos = '\0';
-            fprintf(output_file, "%s%s%s", buffer, value, pos + strlen(placeholder));
+    FILE *templateFile = fopen("template.html", "r");
+    if (!templateFile) {
+        printf("Erreur d'ouverture du fichier template.html\n");
+        return 1;
+    }
+
+    FILE *outputFile = fopen("index.html", "w");
+    if (!outputFile) {
+        printf("Erreur d'ouverture du fichier index.html\n");
+        return 1;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), templateFile)) {
+        // Remplacer les placeholders par les données de data.txt
+        if (strstr(line, "{{ title }}")) {
+            fprintf(outputFile, "%s", line);
+        } else if (strstr(line, "{{ content }}")) {
+            fprintf(outputFile, "%s", line);
         } else {
-            // Copier la ligne sans modification
-            fprintf(output_file, "%s", buffer);
+            fprintf(outputFile, "%s", line);
         }
     }
-}
 
-int main() {
-    FILE *template_file = fopen("template.html", "r");
-    FILE *output_file = fopen("index.html", "w");
-    FILE *data_file = fopen("data.txt", "r");
+    fclose(templateFile);
+    fclose(outputFile);
 
-    if (template_file == NULL || output_file == NULL || data_file == NULL) {
-        perror("Erreur d'ouverture de fichier");
-        return 1;
-    }
-    if (data_file == NULL) {
-        perror("Erreur d'ouverture de data.txt");
-        return 1;
-    }
-
-    // Variables pour les placeholders
-    char title[MAX_LENGTH];
-    char content[MAX_LENGTH];
-
-    // Lire les données du fichier data.txt (ex: title=Mon titre, content=Mon contenu)
-    while (fscanf(data_file, "title=%s\n", title) != EOF && fscanf(data_file, "content=%s\n", content) != EOF) {
-        // Remplacer les placeholders dans le template
-        replace_placeholder(template_file, "{{ title }}", title);
-        replace_placeholder(template_file, "{{ content }}", content);
-    }
-
-    fclose(template_file);
-    fclose(output_file);
-    fclose(data_file);
-
-    printf("Page HTML générée avec succès !\n");
-
+    printf("Fichier index.html généré avec succès.\n");
     return 0;
 }
