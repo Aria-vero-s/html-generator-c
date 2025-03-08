@@ -1,0 +1,2 @@
+title=Bienvenue sur mon site
+content=Ceci est une page générée par un programme en C.
