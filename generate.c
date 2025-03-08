@@ -1,45 +1,20 @@
-#include <stdio.h>
-#include <string.h>
+function processCommand(command) {
+  const output = document.getElementById('output');
+  
+  const args = command.split(' ');
+  const mainCommand = args[0];
+  const parameters = args.slice(1).join(' '); // Récupère tous les paramètres après la commande
 
-int main() {
-    FILE *dataFile = fopen("data.txt", "r");
-    if (!dataFile) {
-        printf("Erreur d'ouverture du fichier data.txt\n");
-        return 1;
+  if (mainCommand === 'help') {
+    output.innerHTML += '<div>$ help</div><div>Voici les commandes disponibles:</div><div>- greet [nom]: Affiche un message de bienvenue</div><div>- help: Affiche les instructions</div>';
+  } else if (mainCommand === 'greet') {
+    if (parameters) {
+      output.innerHTML += `<div>$ greet ${parameters}</div><div>Bonjour, ${parameters} ! Bienvenue sur le terminal simulé.</div>`;
+    } else {
+      output.innerHTML += '<div>$ greet</div><div>Vous devez entrer un nom après "greet". Exemple: "greet Alice".</div>';
     }
-
-    char title[100], content[100];
-    fscanf(dataFile, "title=%99[^\n]\n", title);
-    fscanf(dataFile, "content=%99[^\n]\n", content);
-    fclose(dataFile);
-
-    FILE *templateFile = fopen("template.html", "r");
-    if (!templateFile) {
-        printf("Erreur d'ouverture du fichier template.html\n");
-        return 1;
-    }
-
-    FILE *outputFile = fopen("index.html", "w");
-    if (!outputFile) {
-        printf("Erreur d'ouverture du fichier index.html\n");
-        return 1;
-    }
-
-    char line[256];
-    while (fgets(line, sizeof(line), templateFile)) {
-        // Remplacer les placeholders par les données de data.txt
-        if (strstr(line, "{{ title }}")) {
-            fprintf(outputFile, "%s", line);
-        } else if (strstr(line, "{{ content }}")) {
-            fprintf(outputFile, "%s", line);
-        } else {
-            fprintf(outputFile, "%s", line);
-        }
-    }
-
-    fclose(templateFile);
-    fclose(outputFile);
-
-    printf("Fichier index.html généré avec succès.\n");
-    return 0;
+  } else {
+    output.innerHTML += `<div>$ ${command}</div><div>Commande inconnue. Tapez "help" pour voir les options.</div>`;
+  }
+  output.scrollTop = output.scrollHeight;
 }
